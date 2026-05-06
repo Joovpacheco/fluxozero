@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>FluxoZero</title>
+
+  <!-- 🔥 CSS -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- 🗺️ LEAFLET -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet/dist/leaflet.css"
+  />
+</head>
+
+<body>
+
+  <!-- 🔝 HEADER -->
+  <header class="topbar">
+
+    <h1>🛒 FluxoZero</h1>
+
+    <div class="nav">
+
+      <button onclick="trocarTela('buscaSection', this)">
+        🔍 Buscar
+      </button>
+
+      <button onclick="trocarTela('mapaSection', this)">
+        🗺️ Mapa
+      </button>
+
+      <!-- 🔐 ÁREA USUÁRIO -->
+      <div id="areaUsuario">
+
+        <!-- LOGIN -->
+        <button
+          id="btnLogin"
+          onclick="trocarTela('loginSection', this)"
+        >
+          🔐 Login
+        </button>
+
+        <!-- 👤 MENU USUÁRIO -->
+        <div id="menuUsuario" style="display:none;">
+
+          <button
+            class="userBtn"
+            onclick="toggleMenuUsuario()"
+          >
+            <img
+              id="avatarUsuario"
+              src="https://i.imgur.com/6VBx3io.png"
+              class="avatar"
+            >
+
+            <span id="nomeUsuario"></span> ▼
+          </button>
+
+          <!-- DROPDOWN -->
+          <div
+            id="dropdownUsuario"
+            class="dropdown"
+          >
+
+            <button onclick="abrirPerfil()">
+              👤 Perfil
+            </button>
+
+            <button onclick="trocarTela('areaCadastro')">
+              ➕ Cadastrar estabelecimento
+            </button>
+
+            <button onclick="gerenciarEstabelecimentos()">
+              🏪 Gerenciar estabelecimentos
+            </button>
+
+            <button onclick="logout()">
+              🚪 Sair
+            </button>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 📢 PROPAGANDA -->
+  <div class="ads">
+    🔥 Economize com a FluxoZero!
+  </div>
+
+  <!-- 🔐 LOGIN -->
+  <section class="card" id="loginSection">
+
+    <h2>Login</h2>
+
+    <div class="grid">
+
+      <input
+        id="user"
+        placeholder="Usuário"
+      >
+
+      <input
+        id="senha"
+        type="password"
+        placeholder="Senha"
+      >
+
+    </div>
+
+    <div class="botoes">
+
+      <button onclick="login()">
+        Entrar
+      </button>
+
+      <button onclick="registrarUsuario()">
+        Criar conta
+      </button>
+
+      <button onclick="logout()">
+        Sair
+      </button>
+
+    </div>
+  </section>
+
+  <!-- 🔍 BUSCA -->
+  <section class="card" id="buscaSection">
+
+    <h2>Busca</h2>
+
+    <input
+      type="text"
+      id="busca"
+      placeholder="Digite produto ou estabelecimento"
+      onkeydown="if(event.key==='Enter') buscar()"
+    >
+
+<div class="grid">
+
+  <select id="tipoBusca">
+
+    <option value="produto">
+      Produto
+    </option>
+
+    <option value="estabelecimento">
+      Estabelecimento
+    </option>
+
+  </select>
+
+  <select id="filtroTipo">
+
+    <option value="">
+      Todos os tipos
+    </option>
+
+    <option value="Mercado">
+      🛒 Mercado
+    </option>
+
+    <option value="Padaria">
+      🥖 Padaria
+    </option>
+
+    <option value="Restaurante">
+      🍽️ Restaurante
+    </option>
+
+    <option value="Lanchonete">
+      🍔 Lanchonete
+    </option>
+
+    <option value="Açougue">
+      🥩 Açougue
+    </option>
+
+    <option value="Hortifruti">
+      🥬 Hortifruti
+    </option>
+
+  </select>
+
+  <select id="regiao">
+
+    <option value="">
+      Todas as regiões
+    </option>
+
+  </select>
+
+</div>
+
+    <button onclick="buscar()">
+      🔍 Buscar
+    </button>
+
+    <!-- RESULTADOS -->
+    <div id="resultados" class="lista"></div>
+
+  </section>
+
+  <!-- 🗺️ MAPA -->
+  <section class="card" id="mapaSection">
+
+    <h2>Mapa</h2>
+
+    <div class="botoes">
+
+      <button onclick="iniciarLocalizacao()">
+        📍 Localização
+      </button>
+
+      <button onclick="buscarPostos()">
+        ⛽ Postos
+      </button>
+
+      <button onclick="buscarMelhorCombo()">
+        🚀 Melhor rota
+      </button>
+
+    </div>
+
+    <div id="mapa"></div>
+
+  </section>
+
+  <!-- 👤 PERFIL -->
+  <section
+    id="perfilSection"
+    class="card"
+    style="display:none;"
+  >
+
+    <h2>Perfil</h2>
+
+    <div class="perfilBox">
+
+      <img
+        id="fotoPerfilPreview"
+        src="https://i.imgur.com/6VBx3io.png"
+        class="avatarGrande"
+      >
+
+      <input
+        type="text"
+        id="novoNome"
+        placeholder="Novo nome"
+      >
+
+<input
+  type="file"
+  id="novaFoto"
+  accept="image/*"
+  onchange="previewFoto(event)"
+>
+
+      <button onclick="salvarPerfil()">
+        💾 Salvar perfil
+      </button>
+
+    </div>
+
+  </section>
+
+  <!-- 🏪 CADASTRAR ESTABELECIMENTO -->
+  <section
+    id="areaCadastro"
+    class="card"
+    style="display:none;"
+  >
+
+    <h2>Cadastrar Estabelecimento</h2>
+
+    <div class="grid">
+
+      <input
+        type="text"
+        id="nomeEst"
+        placeholder="Nome"
+      >
+
+      <input
+        type="text"
+        id="regiaoEst"
+        placeholder="Região"
+      >
+
+      <input
+        type="number"
+        id="lat"
+        placeholder="Latitude"
+      >
+
+      <input
+        type="number"
+        id="lng"
+        placeholder="Longitude"
+      >
+
+    </div>
+    <select id="tipoEst">
+  <option value="">
+    Tipo do estabelecimento
+  </option>
+
+  <option value="Mercado">
+    🛒 Mercado
+  </option>
+
+  <option value="Padaria">
+    🥖 Padaria
+  </option>
+
+  <option value="Restaurante">
+    🍽️ Restaurante
+  </option>
+
+  <option value="Lanchonete">
+    🍔 Lanchonete
+  </option>
+
+  <option value="Açougue">
+    🥩 Açougue
+  </option>
+
+  <option value="Hortifruti">
+    🥬 Hortifruti
+  </option>
+
+</select>
+    <div class="botoes">
+
+      <button onclick="definirPrecoGasolina()">
+        ⛽ Gasolina
+      </button>
+
+      <button onclick="cadastrar()">
+        🏪 Cadastrar
+      </button>
+
+    </div>
+
+  </section>
+
+  <!-- 🏪 GERENCIAR -->
+  <section
+    id="gerenciarSection"
+    class="card"
+    style="display:none;"
+  >
+
+    <h2>Gerenciar Estabelecimentos</h2>
+
+    <div id="listaEstabelecimentos">
+      <!-- JS PREENCHE -->
+    </div>
+
+  </section>
+
+  <!-- 📜 SCRIPTS -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="script.js"></script>
+<footer class="footerAviso">
+
+  ⚠️ Encontrou preços falsos,
+  produtos vencidos ou práticas abusivas?
+
+  Denuncie para a Vigilância Sanitária
+  pelo <strong>Disque 136</strong>.
+
+</footer>
+
+</body>
+</html>
