@@ -1,3 +1,14 @@
+const supabaseUrl =
+  "https://whbmojydgmimrobaoitt.supabase.co";
+
+const supabaseKey =
+  "sb_publishable_J5diF1zotwMD6d00NBEn8w_0MSNlc7q";
+
+const db =
+  supabase.createClient(
+    supabaseUrl,
+    supabaseKey
+  );
 // 🔥 VARIÁVEIS GLOBAIS
 let produtosTemp = [];
 let marcadores = [];
@@ -22,9 +33,21 @@ let iconeMelhor = L.icon({
   iconSize: [35, 35],
 });
 // 🏪 DADOS
-let dadosSalvos = localStorage.getItem("estabelecimentos");
-let estabelecimentos =
-  dadosSalvos ? JSON.parse(dadosSalvos) : [];
+let estabelecimentos = [];
+async function carregarDados() {
+
+  let { data, error } =
+    await db
+      .from("estabelecimentos")
+      .select("*");
+
+  if(error){
+    console.log(error);
+    return;
+  }
+
+  estabelecimentos = data || [];
+}
 // 🔄 TROCAR TELA
 function trocarTela(id, el) {
     let secoes = [
@@ -172,7 +195,7 @@ function buscar() {
     "filtroTipo"
   ).value;
   if (!mapa) {
-    trocarTela("mapaSection");
+    return trocarTela("mapaSection");
   }
   let termo =
     document
@@ -297,7 +320,7 @@ function calcularMelhorCombo(produto) {
   }
   let melhor = null;
   estabelecimentos.forEach(est => {
-    est.produtos.forEach(prod => {
+    (est.produtos || []).forEach(prod => {
       if (
         !prod.nome
           .toLowerCase()
@@ -364,7 +387,7 @@ function buscarMelhorCombo() {
   if (postos.length === 0) {
     let melhor = null;
     estabelecimentos.forEach(est => {
-      est.produtos.forEach(prod => {
+      (est.produtos || []).forEach(prod => {
         if (
           !prod.nome
             .toLowerCase()
@@ -590,7 +613,7 @@ function atualizarUI() {
     usuarioLogado.user;
     avatar.src =
       usuarioLogado.foto ||
-      "https://i.imgur.com/6VBx3io.png";
+      "https://cdn-icons-png.flaticon.com/512/149/149071.png";
   } else {
     btnLogin.style.display = "block";
     menuUsuario.style.display = "none";
@@ -600,14 +623,12 @@ function atualizarUI() {
 function abrirPerfil() {
 
   trocarTela("perfilSection");
+
   document.getElementById(
-    "perfilNome"
+    "novoNome"
   ).value =
     usuarioLogado.nome || "";
-  document.getElementById(
-    "perfilFoto"
-  ).value =
-    usuarioLogado.foto || "";
+
 }
 function gerenciarEstabelecimentos() {
 
@@ -721,7 +742,7 @@ let div =
         <p>
            ⭐ Média:
            ${media.toFixed(1)}
-          (${est.avaliacoes.length} avaliações)
+          (${est.avaliacoes?.length || 0} avaliações)
         </p>
         <br>
         <button
@@ -802,7 +823,7 @@ function registrarUsuario() {
     user,
     senha,
     nome: user,
-    foto: "https://i.imgur.com/6VBx3io.png"
+    foto: "https://cdn-icons-png.flaticon.com/512/149/149071.png"
   };
   usuarios.push(novo);
   localStorage.setItem(
@@ -831,6 +852,32 @@ function previewFoto(event){
 
   reader.readAsDataURL(file);
 
+}
+// Editar Produto
+async function editarProduto(
+  estId,
+  prodIndex,
+  campo,
+  valor
+){
+  let est =
+    estabelecimentos.find(
+      e => e.id === estId
+    );
+
+  if(!est) return;
+
+  est.produtos[prodIndex][campo] =
+    campo === "preco"
+      ? parseFloat(valor)
+      : parseInt(valor);
+
+  await db
+    .from("estabelecimentos")
+    .update({
+      produtos: est.produtos
+    })
+    .eq("id", est.id);
 }
 // ➕ ADICIONAR PRODUTO
 function adicionarProduto() {
@@ -884,7 +931,7 @@ function limparProdutos() {
     atualizarListaProdutos();
 }
 // 🏪 CADASTRAR ESTABELECIMENTO
-function cadastrar() {
+async function cadastrar() {
   let nome =
     document.getElementById("nomeEst").value;
   let regiao =
@@ -911,22 +958,26 @@ function cadastrar() {
     alert("Preencha os dados");
     return;
   }
-  let novo = {
-    id: Date.now(),
-    dono: usuarioLogado.user,
-    nome,
-    tipo,
-    regiao,
-    lat,
-    lng,
-    produtos:[],
-    avaliacoes:[]
-  };
-  estabelecimentos.push(novo);
-  localStorage.setItem(
-    "estabelecimentos",
-    JSON.stringify(estabelecimentos)
-  );
+let novo = {
+  dono: usuarioLogado.user,
+  nome,
+  tipo,
+  regiao,
+  lat,
+  lng,
+  produtos: [],
+  avaliacoes: []
+};
+let { error } =
+  await db
+    .from("estabelecimentos")
+    .insert([novo]);
+if(error){
+  console.log(error);
+  alert("Erro ao cadastrar");
+  return;
+}
+await carregarDados();
   alert("🏪 Estabelecimento cadastrado!");
   document.getElementById("nomeEst").value = "";
   document.getElementById("regiaoEst").value = "";
@@ -934,32 +985,30 @@ function cadastrar() {
   document.getElementById("lng").value = "";
 }
 //Excluir Estabelecimentos 
-function excluirEstabelecimento(id) {
-  estabelecimentos =
-    estabelecimentos.filter(
-      e => e.id !== id
-    );
-  localStorage.setItem(
-    "estabelecimentos",
-    JSON.stringify(estabelecimentos)
-  );
-  abrirGerenciamento();
+async function excluirEstabelecimento(id){
+  let { error } =
+    await db
+      .from("estabelecimentos")
+      .delete()
+      .eq("id", id);
+  if(error){
+    alert("Erro ao excluir");
+    return;
+  }
+  await carregarDados();
+  gerenciarEstabelecimentos();
 }
 // ⭐ AVALIAR ESTABELECIMENTO
-function avaliarEstabelecimento(id){
-
+async function avaliarEstabelecimento(id){
   let est =
     estabelecimentos.find(
       e => e.id === id
     );
-
   if(!est) return;
-
   let nota =
     parseInt(
       prompt("Nota de 1 a 5")
     );
-
   if(
     isNaN(nota) ||
     nota < 1 ||
@@ -968,29 +1017,30 @@ function avaliarEstabelecimento(id){
     alert("Nota inválida");
     return;
   }
-
   let comentario =
     prompt("Comentário");
-
+  if(!est.avaliacoes){
+    est.avaliacoes = [];
+  }
   est.avaliacoes.push({
     usuario:
       usuarioLogado.user,
     nota,
     comentario
   });
-
-  localStorage.setItem(
-    "estabelecimentos",
-    JSON.stringify(estabelecimentos)
-  );
-
+  await db
+    .from("estabelecimentos")
+    .update({
+      avaliacoes:
+        est.avaliacoes
+    })
+    .eq("id", est.id);
+  await carregarDados();
   gerenciarEstabelecimentos();
-
   alert("⭐ Avaliação enviada!");
-
 }
 // Produtos
-function abrirProdutos(id) {
+async function abrirProdutos(id) {
   let est =
     estabelecimentos.find(
       e => e.id === id
@@ -1006,21 +1056,24 @@ function abrirProdutos(id) {
   let quantidade =
     parseInt(
       prompt("Quantidade")
-    );
+    ) || 0;
   let validade =
     parseInt(
       prompt("Validade em dias")
-    );
-    est.produtos.push({
-      nome,
-      preco,
-      quantidade,
-      validade
-   });
-  localStorage.setItem(
-    "estabelecimentos",
-    JSON.stringify(estabelecimentos)
-  );
+    ) || 0;
+  est.produtos.push({
+    nome,
+    preco,
+    quantidade,
+    validade
+  });
+  await db
+    .from("estabelecimentos")
+    .update({
+      produtos: est.produtos
+    })
+    .eq("id", est.id);
+  await carregarDados();
   alert("Produto adicionado!");
 }
 // Salvar
@@ -1070,68 +1123,76 @@ function salvarPerfil(){
 
 }
 // ➕ ADICIONAR PRODUTO NO GERENCIAMENTO
-function adicionarProdutoGerenciamento(id) {
-
+async function adicionarProdutoGerenciamento(id){
   let est =
     estabelecimentos.find(
       e => e.id === id
     );
-  if (!est) return;
+  if(!est) return;
   let nome =
     prompt("Nome do produto");
-  if (!nome) return;
+  if(!nome) return;
   let preco =
     parseFloat(
       prompt("Preço do produto")
     );
-  if (isNaN(preco)) {
+  if(isNaN(preco)){
     alert("Preço inválido");
     return;
   }
   let quantidade =
     parseInt(
       prompt("Quantidade")
-    );
-  if (isNaN(quantidade)) {
-    quantidade = 0;
-  }
+    ) || 0;
   let validade =
     parseInt(
       prompt("Validade em dias")
-    );
-  if (isNaN(validade)) {
-    validade = 0;
-  }
+    ) || 0;
   est.produtos.push({
     nome,
     preco,
     quantidade,
     validade
   });
-  localStorage.setItem(
-    "estabelecimentos",
-    JSON.stringify(estabelecimentos)
-  );
+  await db
+    .from("estabelecimentos")
+    .update({
+      produtos:
+        est.produtos
+    })
+    .eq("id", est.id);
+  await carregarDados();
   gerenciarEstabelecimentos();
   alert("✅ Produto adicionado!");
 }
 // 🗑️ REMOVER PRODUTO
-function removerProduto(estId, prodIndex) {
-
+async function removerProduto(
+  estId,
+  prodIndex
+){
   let est =
     estabelecimentos.find(
       e => e.id === estId
     );
-  if (!est) return;
-  est.produtos.splice(prodIndex, 1);
-  localStorage.setItem(
-    "estabelecimentos",
-    JSON.stringify(estabelecimentos)
+  if(!est) return;
+  est.produtos.splice(
+    prodIndex,
+    1
   );
+  await db
+    .from("estabelecimentos")
+    .update({
+      produtos:
+        est.produtos
+    })
+    .eq("id", est.id);
+  await carregarDados();
   gerenciarEstabelecimentos();
 }
-function salvarProduto(estId,index){
-
+async function salvarProduto(
+  estId,
+  index
+){
   let est =
     estabelecimentos.find(
       e => e.id === estId
@@ -1161,30 +1222,15 @@ function salvarProduto(estId,index){
         `validade-${estId}-${index}`
       ).value
     );
-  localStorage.setItem(
-    "estabelecimentos",
-    JSON.stringify(estabelecimentos)
-  );
+  await db
+    .from("estabelecimentos")
+    .update({
+      produtos:
+        est.produtos
+    })
+    .eq("id", est.id);
+  await carregarDados();
   alert("✅ Produto atualizado");
-}
-function removerProduto(estId,index){
-
-  let est =
-    estabelecimentos.find(
-      e => e.id === estId
-    );
-
-  if(!est) return;
-
-  est.produtos.splice(index,1);
-
-  localStorage.setItem(
-    "estabelecimentos",
-    JSON.stringify(estabelecimentos)
-  );
-
-  gerenciarEstabelecimentos();
-
 }
 // 🛣️ ROTA DIRETA
 async function desenharRotaDireta(
@@ -1266,13 +1312,15 @@ window.addEventListener("click", e => {
       "dropdownUsuario"
     );
   if (
+    menu &&
     !menu.contains(e.target)
   ) {
     dropdown.style.display = "none";
   }
 });
 // 🚀 START
-window.onload = () => {
+window.onload = async () => {
+  await carregarDados();
   atualizarUI();
   trocarTela("buscaSection");
-};
+}; 
