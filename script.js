@@ -5,7 +5,7 @@ const supabaseKey =
   "sb_publishable_J5diF1zotwMD6d00NBEn8w_0MSNlc7q";
 
 const db =
-  supabase.createClient(
+  window.supabase.createClient(
     supabaseUrl,
     supabaseKey
   );
@@ -190,66 +190,133 @@ function toggleMenuUsuario() {
 }
 // 🔎 BUSCAR
 function buscar() {
-  let filtroTipo =
-  document.getElementById(
-    "filtroTipo"
-  ).value;
-  if (!mapa) {
-    return trocarTela("mapaSection");
-  }
+
   let termo =
     document
       .getElementById("busca")
       .value
-      .toLowerCase();
+      .toLowerCase()
+      .trim();
+  let filtroTipo =
+    document.getElementById(
+      "filtroTipo"
+    ).value;
   let resultadosDiv =
-    document.getElementById("resultados");
+    document.getElementById(
+      "resultados"
+    );
   resultadosDiv.innerHTML = "";
+  if (!usuarioLat || !usuarioLng) {
+    alert(
+      "Ative sua localização primeiro"
+    );
+    return;
+  }
   let resultados = [];
   estabelecimentos.forEach(est => {
-    if(
-  filtroTipo &&
-  est.tipo !== filtroTipo
-){
-  return;
-}
-    (est.produtos || []).forEach(prod => {
-      if (
-        !prod.nome
-          .toLowerCase()
-          .includes(termo)
-      ) return;
-      let distancia = usuarioLat
-        ? calcularDistancia(
-            usuarioLat,
-            usuarioLng,
-            est.lat,
-            est.lng
-          )
-        : 0;
+    // 🔥 distância máxima 5km
+    let distancia =
+      calcularDistancia(
+        usuarioLat,
+        usuarioLng,
+        est.lat,
+        est.lng
+      );
+    if (distancia > 5) {
+      return;
+    }
+    // 🔥 filtro tipo
+    if (
+      filtroTipo &&
+      est.tipo !== filtroTipo
+    ) {
+      return;
+    }
+    // 🔥 sem termo → busca só pelo tipo
+    if (!termo) {
       resultados.push({
-        produto: prod.nome,
-        preco: prod.preco,
+        produto: "Sem produto específico",
+        preco: "-",
         estabelecimento: est.nome,
         distancia,
         lat: est.lat,
-        lng: est.lng
+        lng: est.lng,
+        tipo: est.tipo
       });
+      return;
+    }
+    // 🔥 busca por nome estabelecimento
+    if (
+      est.nome
+        .toLowerCase()
+        .includes(termo)
+    ) {
+      resultados.push({
+        produto: "Estabelecimento",
+        preco: "-",
+        estabelecimento: est.nome,
+        distancia,
+        lat: est.lat,
+        lng: est.lng,
+        tipo: est.tipo
+      });
+    }
+    // 🔥 busca produtos
+    (est.produtos || []).forEach(prod => {
+      if (
+        prod.nome
+          .toLowerCase()
+          .includes(termo)
+      ) {
+        resultados.push({
+          produto: prod.nome,
+          preco: prod.preco,
+          estabelecimento: est.nome,
+          distancia,
+          lat: est.lat,
+          lng: est.lng,
+          tipo: est.tipo
+        });
+      }
     });
   });
-  resultados.sort((a, b) => a.preco - b.preco);
+  // 🔥 ordena por distância
+  resultados.sort(
+    (a, b) =>
+      a.distancia - b.distancia
+  );
+  // 🔥 sem resultados
+  if (resultados.length === 0) {
+    resultadosDiv.innerHTML = `
+      <div class="card">
+        Nenhum resultado encontrado em até 5km.
+      </div>
+    `;
+    mostrarNoMapa([]);
+    return;
+  }
+  // 🔥 render lista
   resultados.forEach((r, i) => {
     resultadosDiv.innerHTML += `
       <div class="card">
-        <strong>${r.produto}</strong>
+        <strong>
+          ${r.estabelecimento}
+        </strong>
         ${
           i === 0
-            ? "<span style='color:#22c55e'> 🔥 Melhor</span>"
+            ? "<span style='color:#22c55e'> 🔥 Mais próximo</span>"
             : ""
         }
         <br><br>
-        🏪 ${r.estabelecimento}<br>
-        💰 R$ ${r.preco}<br>
+        🏪 ${r.tipo}<br>
+
+        📦 ${r.produto}<br>
+
+        💰 ${
+          r.preco === "-"
+            ? "-"
+            : "R$ " + r.preco
+        }<br>
         📍 ${r.distancia.toFixed(2)} km
       </div>
     `;
@@ -1232,6 +1299,102 @@ async function salvarProduto(
   await carregarDados();
   alert("✅ Produto atualizado");
 }
+async function importarMercados() {
+
+  if (!mapa) {
+    alert("Abra o mapa primeiro");
+    return;
+  }
+  try {
+    let centro = mapa.getCenter();
+    let url =
+      `https://overpass-api.de/api/interpreter?data=
+      [out:json];
+      (
+        node["shop"="supermarket"](around:5000,${centro.lat},${centro.lng});
+        node["shop"="convenience"](around:5000,${centro.lat},${centro.lng});
+        node["shop"="bakery"](around:5000,${centro.lat},${centro.lng});
+      );
+      out;`;
+    let res = await fetch(url);
+    let data = await res.json();
+    let adicionados = 0;
+    for (let el of data.elements) {
+      let nome =
+        el.tags?.name ||
+        "Estabelecimento";
+      let lat = el.lat;
+      let lng = el.lon;
+      // 🔥 verifica duplicado
+      let existe =
+        estabelecimentos.find(
+          e =>
+            e.nome === nome &&
+            Math.abs(e.lat - lat) < 0.0001 &&
+            Math.abs(e.lng - lng) < 0.0001
+        );
+      if (existe) {
+        continue;
+      }
+      // 🔥 define tipo
+      let tipo = "Mercado";
+      if (el.tags?.shop === "bakery") {
+        tipo = "Padaria";
+      }
+      let novo = {
+        dono: "IMPORTADO",
+        nome,
+        tipo,
+        regiao: "Importado",
+        lat,
+        lng,
+        produtos: [],
+        avaliacoes: []
+      };
+      let { error } =
+        await db
+          .from("estabelecimentos")
+          .insert([novo]);
+      if (!error) {
+        adicionados++;
+      }
+    }
+    await carregarDados();
+
+    mostrarEstabelecimentosNoMapa();
+    alert(
+      `✅ ${adicionados} estabelecimentos importados`
+    );
+  } catch (e) {
+    console.log(e);
+    alert(
+      "Erro ao importar estabelecimentos"
+    );
+  }
+}
+function mostrarEstabelecimentosNoMapa() {
+
+  if (!mapa) return;
+  marcadores.forEach(m => {
+    mapa.removeLayer(m);
+  });
+  marcadores = [];
+  estabelecimentos.forEach(est => {
+    let marcador = L.marker([
+      est.lat,
+      est.lng
+    ]).addTo(mapa);
+    marcador.bindPopup(`
+      <b>${est.nome}</b><br>
+      🏪 ${est.tipo}<br>
+      📍 ${est.regiao}
+    `);
+    marcador.on("mouseover", () => {
+      marcador.openPopup();
+    });
+    marcadores.push(marcador);
+  });
+}
 // 🛣️ ROTA DIRETA
 async function desenharRotaDireta(
   pontos,
@@ -1323,4 +1486,8 @@ window.onload = async () => {
   await carregarDados();
   atualizarUI();
   trocarTela("buscaSection");
-}; 
+  setTimeout(() => {
+    trocarTela("mapaSection");
+    mostrarEstabelecimentosNoMapa();
+  }, 500);
+};
