@@ -28,10 +28,18 @@ let usuarioLng = null;
 // 🗺️ MAPA
 let mapa;
 // 🏆 ÍCONE MELHOR
-let iconeMelhor = L.icon({
-  iconUrl: "https://cdn-icons-png.flaticon.com/512/190/190411.png",
-  iconSize: [35, 35],
-});
+let iconeMelhor = null;
+
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+    iconeMelhor = L.icon({
+      iconUrl:
+        "https://cdn-icons-png.flaticon.com/512/190/190411.png",
+      iconSize: [35,35]
+    });
+  }
+);
 // 🏪 DADOS
 let estabelecimentos = [];
 async function carregarDados() {
@@ -355,7 +363,7 @@ async function buscarPostos() {
   try {
     let centro = mapa.getCenter();
     let url =
-      `https://overpass-api.de/api/interpreter?data=[out:json];node["amenity"="fuel"](around:2000,${centro.lat},${centro.lng});out;`;
+      `https://overpass.kumi.systems/api/interpreter?data=[out:json];node["amenity"="fuel"](around:2000,${centro.lat},${centro.lng});out;`;
     let res = await fetch(url);
     let data = await res.json();
     postos = [];
@@ -1308,7 +1316,7 @@ async function importarMercados() {
   try {
     let centro = mapa.getCenter();
     let url =
-      `https://overpass-api.de/api/interpreter?data=
+      `https://overpass.kumi.systems/api/interpreter?data=
       [out:json];
       (
         node["shop"="supermarket"](around:5000,${centro.lat},${centro.lng});
