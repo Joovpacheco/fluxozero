@@ -170,21 +170,56 @@ function calcularDistancia(lat1, lng1, lat2, lng2) {
   );
 }
 // 📍 LOCALIZAÇÃO
-function iniciarLocalizacao() {
-  navigator.geolocation.getCurrentPosition(pos => {
-    usuarioLat = pos.coords.latitude;
-    usuarioLng = pos.coords.longitude;
-    if (marcadorUsuario) {
-      mapa.removeLayer(marcadorUsuario);
+function iniciarLocalizacao(){
+  if(!navigator.geolocation){
+    alert(
+      "Geolocalização não suportada"
+    );
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      usuarioLat =
+        pos.coords.latitude;
+      usuarioLng =
+        pos.coords.longitude;
+      console.log(
+        "LOCALIZAÇÃO:",
+        usuarioLat,
+        usuarioLng
+      );
+      if(marcadorUsuario){
+        mapa.removeLayer(
+          marcadorUsuario
+        );
+      }
+      marcadorUsuario =
+        L.marker([
+          usuarioLat,
+          usuarioLng
+        ])
+        .addTo(mapa)
+        .bindPopup("📍 Você");
+      mapa.setView(
+        [usuarioLat, usuarioLng],
+        15
+      );
+      alert(
+        "📍 Localização ativada!"
+      );
+    },
+    erro => {
+      console.log(erro);
+      alert(
+        "❌ Permita localização no navegador"
+      );
+    },
+    {
+      enableHighAccuracy:true,
+      timeout:15000,
+      maximumAge:0
     }
-    marcadorUsuario = L.marker([
-      usuarioLat,
-      usuarioLng
-    ])
-      .addTo(mapa)
-      .bindPopup("📍 Você");
-    mapa.setView([usuarioLat, usuarioLng], 15);
-  });
+  );
 }
 function toggleMenuUsuario() {
   let d =
@@ -198,7 +233,12 @@ function toggleMenuUsuario() {
 }
 // 🔎 BUSCAR
 function buscar() {
-
+if(!usuarioLat || !usuarioLng){
+  alert(
+    "Ative sua localização primeiro"
+  );
+  return;
+}
   let termo =
     document
       .getElementById("busca")
@@ -360,10 +400,24 @@ function mostrarNoMapa(lista) {
 }
 // ⛽ POSTOS
 async function buscarPostos() {
+
+  if(!usuarioLat || !usuarioLng){
+    alert("Ative sua localização primeiro");
+    return;
+  }
   try {
     let centro = mapa.getCenter();
+    let query = `
+      [out:json];
+      node["amenity"="fuel"]
+      (around:5000,${centro.lat},${centro.lng});
+      out;
+    `;
     let url =
-      `https://overpass.kumi.systems/api/interpreter?data=[out:json];node["amenity"="fuel"](around:2000,${centro.lat},${centro.lng});out;`;
+      "https://api.allorigins.win/raw?url=" +
+      encodeURIComponent(
+        "https://overpass-api.de/api/interpreter?data=" + query
+      );
     let res = await fetch(url);
     let data = await res.json();
     postos = [];
@@ -373,8 +427,10 @@ async function buscarPostos() {
         el.lat,
         el.lon
       ])
-        .addTo(mapa)
-        .bindPopup("⛽ Posto");
+      .addTo(mapa)
+      .bindPopup(`
+        ⛽ <b>${el.tags?.name || "Posto"}</b>
+      `);
       marcadores.push(marker);
       postos.push({
         nome: el.tags?.name || "Posto",
@@ -384,7 +440,8 @@ async function buscarPostos() {
       });
     });
     alert(`⛽ ${postos.length} postos encontrados`);
-  } catch {
+  } catch (e) {
+    console.log(e);
     alert("Erro ao buscar postos");
   }
 }
@@ -1309,21 +1366,34 @@ async function salvarProduto(
 }
 async function importarMercados() {
 
+  if(!usuarioLat || !usuarioLng){
+    alert("Ative sua localização primeiro");
+    return;
+  }
   if (!mapa) {
     alert("Abra o mapa primeiro");
     return;
   }
   try {
     let centro = mapa.getCenter();
-    let url =
-      `https://overpass.kumi.systems/api/interpreter?data=
+    let query = `
       [out:json];
       (
-        node["shop"="supermarket"](around:5000,${centro.lat},${centro.lng});
-        node["shop"="convenience"](around:5000,${centro.lat},${centro.lng});
-        node["shop"="bakery"](around:5000,${centro.lat},${centro.lng});
+        node["shop"="supermarket"]
+        (around:5000,${centro.lat},${centro.lng});
+        node["shop"="convenience"]
+        (around:5000,${centro.lat},${centro.lng});
+
+        node["shop"="bakery"]
+        (around:5000,${centro.lat},${centro.lng});
       );
-      out;`;
+      out;
+    `;
+    let url =
+      "https://api.allorigins.win/raw?url=" +
+      encodeURIComponent(
+        "https://overpass-api.de/api/interpreter?data=" + query
+      );
     let res = await fetch(url);
     let data = await res.json();
     let adicionados = 0;
@@ -1333,7 +1403,6 @@ async function importarMercados() {
         "Estabelecimento";
       let lat = el.lat;
       let lng = el.lon;
-      // 🔥 verifica duplicado
       let existe =
         estabelecimentos.find(
           e =>
@@ -1341,10 +1410,7 @@ async function importarMercados() {
             Math.abs(e.lat - lat) < 0.0001 &&
             Math.abs(e.lng - lng) < 0.0001
         );
-      if (existe) {
-        continue;
-      }
-      // 🔥 define tipo
+      if (existe) continue;
       let tipo = "Mercado";
       if (el.tags?.shop === "bakery") {
         tipo = "Padaria";
@@ -1368,7 +1434,6 @@ async function importarMercados() {
       }
     }
     await carregarDados();
-
     mostrarEstabelecimentosNoMapa();
     alert(
       `✅ ${adicionados} estabelecimentos importados`
@@ -1498,4 +1563,5 @@ window.onload = async () => {
     trocarTela("mapaSection");
     mostrarEstabelecimentosNoMapa();
   }, 500);
+  iniciarLocalizacao();
 };

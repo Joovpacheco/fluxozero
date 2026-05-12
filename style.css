@@ -6,12 +6,12 @@
   font-family:'Segoe UI',sans-serif;
 }
 
-/* 🌍 HTML/BODY */
 html,
 body{
   min-height:100%;
 }
-/* 🌙 BACKGROUND */
+
+/* 🌙 BODY */
 body{
   background:
     linear-gradient(
@@ -19,148 +19,305 @@ body{
       #0f172a,
       #020617
     );
+
   color:#e2e8f0;
-  padding:
-    110px 15px 15px;
+
+  padding:12px;
+
   max-width:900px;
   margin:auto;
 }
-/* 🧱 BOX PRINCIPAL */
-.box{
-  background:
-    rgba(30,41,59,0.7);
 
-  backdrop-filter:blur(12px);
+/* 🔝 TOPBAR */
+.topbar{
 
-  padding:15px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
 
-  border-radius:16px;
+  gap:18px;
+
+  padding:14px 18px;
 
   margin-bottom:15px;
 
-  box-shadow:
-    0 10px 30px rgba(0,0,0,0.4);
+  background:
+    rgba(15,23,42,.92);
+
+  backdrop-filter:blur(14px);
+
+  border-radius:20px;
 
   border:
-    1px solid rgba(255,255,255,0.05);
+    1px solid rgba(255,255,255,.05);
+
+  box-shadow:
+    0 8px 25px rgba(0,0,0,.25);
+
+  position:relative;
+
+  z-index:99999;
+}
+
+/* 🔰 LOGO */
+.logoArea{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.logoArea h1{
+  margin:0;
+  font-size:30px;
+  font-weight:700;
+}
+
+/* 🧭 NAV */
+.nav{
+
+  display:flex;
+  align-items:center;
+
+  gap:12px;
+
+  flex-wrap:nowrap;
+}
+
+/* 👤 AREA USER */
+#areaUsuario{
+  margin-left:auto;
+
+  display:flex;
+  align-items:center;
+}
+
+/* 👤 USER BTN */
+.userBtn{
+
+  display:flex;
+  align-items:center;
+  gap:8px;
+
+  padding:10px 14px;
+
+  border-radius:999px;
+
+  background:
+    rgba(255,255,255,.06);
+
+  border:
+    1px solid rgba(255,255,255,.05);
+
+  font-size:14px;
+
+  width:auto !important;
+
+  white-space:nowrap;
+}
+
+/* 🖼️ AVATAR */
+.avatar{
+  width:32px;
+  height:32px;
+
+  border-radius:50%;
+
+  object-fit:cover;
+}
+
+/* 📂 MENU */
+#menuUsuario{
+  position:relative;
+}
+
+/* 📂 DROPDOWN */
+.dropdown{
+
+  display:none;
+
+  position:absolute;
+
+  top:62px;
+  right:0;
+
+  width:240px;
+
+  background:
+    rgba(30,41,59,.98);
+
+  backdrop-filter:blur(14px);
+
+  border-radius:16px;
+
+  padding:12px;
+
+  z-index:999999;
+
+  box-shadow:
+    0 10px 30px rgba(0,0,0,.45);
+
+  border:
+    1px solid rgba(255,255,255,.06);
+}
+
+/* 📢 ADS */
+.adsBanner{
+
+  width:100%;
+
+  height:120px;
+
+  border-radius:18px;
+
+  overflow:hidden;
+
+  margin-bottom:16px;
+
+  position:relative;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  background:
+    linear-gradient(
+      135deg,
+      #1e293b,
+      #0f172a
+    );
+
+  border:
+    1px solid rgba(255,255,255,.06);
+
+  box-shadow:
+    0 10px 25px rgba(0,0,0,.25);
+}
+
+.adsBanner img{
+
+  width:100%;
+  height:100%;
+
+  object-fit:cover;
+
+  opacity:.82;
+}
+
+.adsTexto{
+
+  position:absolute;
+
+  text-align:center;
+
+  font-size:28px;
+
+  font-weight:800;
+
+  color:white;
+
+  text-shadow:
+    0 4px 20px rgba(0,0,0,.6);
+}
+
+/* 📦 BOX */
+.box{
+
+  background:
+    rgba(30,41,59,.72);
+
+  backdrop-filter:blur(14px);
+
+  border-radius:18px;
+
+  padding:16px;
+
+  margin-bottom:14px;
+
+  border:
+    1px solid rgba(255,255,255,.05);
+
+  box-shadow:
+    0 10px 25px rgba(0,0,0,.25);
 }
 
 /* 📦 CARD */
 .card{
-  background:
-    rgba(51,65,85,0.6);
 
-  backdrop-filter:blur(10px);
+  background:
+    rgba(51,65,85,.55);
+
+  backdrop-filter:blur(12px);
 
   padding:14px;
 
-  border-radius:14px;
+  border-radius:16px;
 
   margin-bottom:10px;
 
-  transition:all .2s ease;
-
   border:
-    1px solid rgba(255,255,255,0.05);
+    1px solid rgba(255,255,255,.04);
+
+  transition:.2s;
 }
 
 .card:hover{
   transform:
-    translateY(-4px)
-    scale(1.01);
-
-  box-shadow:
-    0 10px 25px rgba(0,0,0,0.4);
+    translateY(-2px);
 }
 
 /* 🏷️ TITULOS */
-h1{
-  text-align:center;
-
-  margin-bottom:20px;
-
-  font-size:28px;
-
-  letter-spacing:1px;
-}
-
 h2{
   margin-bottom:10px;
-
-  font-size:18px;
-
   color:#94a3b8;
 }
 
 h3,
 h4{
-  margin-bottom:8px;
-}
-
-/* 🧩 GRID */
-.grid{
-  display:grid;
-  gap:10px;
-}
-
-/* 🔘 BOTOES */
-.botoes,
-.botoes-mapa{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
-
-.botoes button{
-  flex:1 1 200px;
+  margin-bottom:6px;
 }
 
 /* 🔍 INPUTS */
 input,
-select,
-button{
-  transition:all .2s ease;
-}
-
-input,
 select{
+
   width:100%;
 
-  padding:12px;
-
-  margin-top:8px;
-
-  border-radius:12px;
+  padding:13px;
 
   border:none;
 
+  border-radius:14px;
+
+  margin-top:8px;
+
+  background:
+    rgba(2,6,23,.9);
+
+  color:#fff;
+
   outline:none;
 
-  background:#020617;
-
-  color:#e2e8f0;
+  font-size:15px;
 }
 
 input:focus,
 select:focus{
-  outline:2px solid #22c55e;
-
-  transform:scale(1.01);
+  outline:
+    2px solid #22c55e;
 }
 
 /* 🟢 BOTÕES */
 button{
-  margin-top:10px;
-
-  padding:12px;
 
   border:none;
 
-  border-radius:12px;
+  border-radius:14px;
 
   cursor:pointer;
 
-  font-weight:bold;
+  font-weight:600;
+
+  color:white;
 
   background:
     linear-gradient(
@@ -169,260 +326,84 @@ button{
       #16a34a
     );
 
-  color:white;
+  transition:.2s;
 
   box-shadow:
-    0 4px 10px rgba(0,0,0,0.3);
+    0 4px 12px rgba(0,0,0,.25);
 }
 
 button:hover{
   transform:
-    translateY(-2px)
-    scale(1.02);
+    translateY(-2px);
 }
 
-button:active{
-  transform:scale(0.96);
+/* 🔥 BOTÕES */
+.nav button,
+.botoes-mapa button{
+  width:auto;
+  padding:
+    20px 34px;
+  font-size:22px;
+  border-radius:999px;
+  flex:none;
+  font-weight:700;
+  box-shadow:
+    0 8px 22px rgba(0,0,0,.28);
+}
+
+/* 🗺️ BOTÕES MAPA */
+.botoes-mapa{
+
+  display:flex;
+
+  gap:10px;
+
+  flex-wrap:wrap;
+
+  margin-bottom:12px;
+}
+
+/* 🟢 BOTÃO ATIVO */
+.nav button.active{
+  background:
+    linear-gradient(
+      135deg,
+      #16a34a,
+      #15803d
+    );
+}
+
+/* 📊 RESULTADOS */
+#resultados{
+  margin-top:12px;
 }
 
 /* 💰 PREÇO */
 .preco{
   color:#22c55e;
-
-  font-weight:bold;
-
   font-size:18px;
-}
-
-/* 📊 RESULTADOS */
-#resultados{
-  margin-top:10px;
-}
-
-.lista{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-
-/* 🔝 TOPBAR */
-.topbar {
-
-  position: fixed;
-
-  top: 0;
-  left: 0;
-
-  width: 100%;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  padding: 14px 18px;
-
-  background: rgba(15,23,42,0.96);
-
-  backdrop-filter: blur(14px);
-
-  border-bottom:
-    1px solid rgba(255,255,255,0.05);
-
-  z-index: 99999;
-
-}
-
-/* 🔰 LOGO */
-.logoArea{
-  display:flex;
-  align-items:center;
-  gap:12px;
-}
-
-.logoArea h1{
-  margin:0;
-}
-
-/* 🧭 NAV */
-.nav{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  flex-wrap:wrap;
-}
-
-.nav button.active{
-  background:#16a34a;
-}
-
-/* 👤 ÁREA USUÁRIO */
-#areaUsuario{
-  margin-left:auto;
-}
-
-/* 👤 MENU */
-#menuUsuario{
-  position:relative;
-}
-
-/* 👤 BOTÃO USER */
-.userBtn{
-  display:flex;
-  align-items:center;
-  gap:10px;
-
-  padding:10px 14px;
-}
-
-/* 🖼️ AVATAR */
-.avatar{
-  width:34px;
-  height:34px;
-
-  border-radius:50%;
-
-  object-fit:cover;
-
-  border:
-    2px solid rgba(255,255,255,0.2);
-}
-
-.avatarGrande{
-  width:110px;
-  height:110px;
-
-  border-radius:50%;
-
-  object-fit:cover;
-
-  margin-bottom:10px;
-
-  border:
-    3px solid rgba(255,255,255,0.1);
-}
-
-/* 📂 DROPDOWN */
-.dropdown{
-  display:none;
-
-  position:absolute;
-
-  top:65px;
-  right:0;
-
-  background:
-    rgba(30,41,59,0.98);
-
-  border-radius:16px;
-
-  padding:12px;
-
-  width:240px;
-
-  max-width:95vw;
-
-  z-index:9999;
-
-  box-shadow:
-    0 10px 30px rgba(0,0,0,.35);
-
-  border:
-    1px solid rgba(255,255,255,0.05);
-}
-
-/* 🔘 BOTÕES MENU */
-.dropdown button{
-  width:100%;
-  margin-bottom:10px;
-}
-
-.dropdown button:last-child{
-  margin-bottom:0;
-}
-
-/* 📢 ADS */
-.ads{
-  background:
-    linear-gradient(
-      135deg,
-      #f59e0b,
-      #f97316
-    );
-
-  padding:12px;
-
-  border-radius:12px;
-
-  text-align:center;
-
   font-weight:bold;
-
-  margin-bottom:15px;
-
-  color:#1e293b;
-
-  animation:pulse 2s infinite;
-}
-
-@keyframes pulse{
-
-  0%{
-    transform:scale(1);
-  }
-
-  50%{
-    transform:scale(1.02);
-  }
-
-  100%{
-    transform:scale(1);
-  }
-
-}
-
-/* 👁️ TELAS */
-#buscaSection,
-#mapaSection,
-#areaCadastro,
-#perfilSection,
-#gerenciarSection{
-  display:none;
 }
 
 /* 🗺️ MAPA */
-#mapaSection{
-  width:100%;
-}
-
 #mapa{
   width:100%;
-
-  height:500px;
-
-  min-height:500px;
-
+  height:420px;
+  min-height:420px;
   display:block;
-
   position:relative;
-
   overflow:hidden;
-
-  border-radius:16px;
-
-  margin-top:10px;
-
+  border-radius:18px;
+  margin-top:12px;
   z-index:1;
-
   background:#0f172a;
 }
 
-/* 🔥 LEAFLET FIX */
+/* 🔥 LEAFLET */
 .leaflet-container{
   width:100% !important;
   height:100% !important;
-
-  border-radius:16px;
-
+  border-radius:18px;
   background:#0f172a;
 }
 
@@ -438,38 +419,46 @@ button:active{
   max-width:none !important;
 }
 
-.leaflet-control-container{
-  z-index:500;
-}
-
-/* 📦 PRODUTO */
-.produtoCard{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
+/* 👁️ TELAS */
+#buscaSection,
+#mapaSection,
+#areaCadastro,
+#perfilSection,
+#gerenciarSection{
+  display:none;
 }
 
 /* 👤 PERFIL */
 .perfilBox{
   display:flex;
   flex-direction:column;
-  gap:12px;
   align-items:center;
+  gap:12px;
+}
+
+.avatarGrande{
+  width:95px;
+  height:95px;
+
+  border-radius:50%;
+
+  object-fit:cover;
 }
 
 /* 🎯 SCROLL */
 ::-webkit-scrollbar{
-  width:6px;
+  width:5px;
 }
 
 ::-webkit-scrollbar-thumb{
   background:#22c55e;
-  border-radius:10px;
+  border-radius:999px;
 }
 
 /* ⚠️ FOOTER */
 .footerAviso{
-  margin-top:30px;
+
+  margin-top:25px;
 
   padding:15px;
 
@@ -478,83 +467,101 @@ button:active{
   font-size:13px;
 
   color:#94a3b8;
-
-  opacity:0.8;
-
-  border-top:
-    1px solid rgba(255,255,255,0.05);
 }
 
-/* 📱 RESPONSIVO */
+/* 📱 MOBILE */
 @media (max-width:768px){
 
-body{
-  padding:
-    140px 10px 10px;
-}
-.topbar{
-  flex-direction:column;
-  align-items:stretch;
-  gap:12px;
-  padding:12px;
-}
+  body{
+    padding:10px;
+  }
+
+  .topbar{
+    flex-wrap:wrap;
+    gap:12px;
+    padding:10px 12px;
+  }
+
+  .logoArea h1{
+    font-size:24px;
+  }
 
   .nav{
-    width:100%;
+
     display:flex;
-    flex-wrap:wrap;
+
+    gap:10px;
+
+    flex:1;
+  }
+
+.nav button{
+  flex:1;
+  width:100%;
+  padding:16px 20px;
+  font-size:18px;
+}
+
+  .botoes-mapa{
+
+    display:grid;
+
+    grid-template-columns:
+      1fr 1fr;
+
     gap:10px;
   }
 
-  .nav button,
+.botoes-mapa button{
+
+  width:100%;
+
+  padding:15px 18px;
+
+  font-size:17px;
+}
+
+  #areaUsuario{
+    margin-left:0;
+  }
+
   .userBtn{
-    width:100%;
+    padding:9px 12px;
+    font-size:13px;
   }
 
-  .grid{
-    grid-template-columns:1fr !important;
-  }
-
-  .botoes{
-    flex-direction:column;
-  }
-
-  .botoes button{
-    width:100%;
-  }
-
-  .card,
-  .box{
-    padding:15px;
-  }
-
-  #mapa{
-    height:350px;
-  }
-
-  input,
-  select,
-  button{
-    width:100%;
-    font-size:16px;
+  .avatar{
+    width:28px;
+    height:28px;
   }
 
   .dropdown{
-    width:100%;
+    width:210px;
+    right:0;
   }
 
-  .avatarGrande{
-    width:90px;
-    height:90px;
+  .box,
+  .card{
+    padding:14px;
   }
 
+  #mapa{
+    height:320px;
+    min-height:320px;
+  }
+
+  input,
+  select{
+    font-size:16px;
+  }
+
+/* 📢 BANNER MOBILE */
+.adsBanner{
+  height:90px;
+  border-radius:16px;
+  margin-bottom:14px;
 }
-
-/* 💻 DESKTOP */
-@media (min-width:768px){
-
-  .grid{
-    grid-template-columns:1fr 1fr;
-  }
-
+.adsTexto{
+  font-size:20px;
+  padding:0 10px;
 }
