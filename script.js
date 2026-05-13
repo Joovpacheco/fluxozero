@@ -764,6 +764,7 @@ function buscarMelhorCombo() {
 }
 // 🛣️ ROTA
 async function desenharRota(pontos, r) {
+  if(!mapa) return;
   try {
     let coords = pontos
       .map(p => `${p[1]},${p[0]}`)
@@ -1693,6 +1694,7 @@ async function desenharRotaDireta(
   pontos,
   r
 ) {
+  if(!mapa) return;
   try {
     let coords = pontos
       .map(
@@ -1779,7 +1781,4 @@ window.onload = async () => {
   await carregarDados();
   atualizarUI();
   trocarTela("mapaSection");
-  setTimeout(() => {
-    iniciarLocalizacao();
-  }, 500);
 };
