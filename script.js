@@ -1780,7 +1780,6 @@ window.onload = async () => {
   atualizarUI();
   trocarTela("mapaSection");
   setTimeout(() => {
-    mostrarEstabelecimentosNoMapa();
     iniciarLocalizacao();
   }, 500);
 };
