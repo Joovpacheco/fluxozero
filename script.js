@@ -424,7 +424,7 @@ async function buscarPostos() {
     `;
 
     let res = await fetch(
-      "https://overpass-api.de/api/interpreter",
+      "/api/overpass",
       {
         method: "POST",
         body: query
@@ -1549,7 +1549,7 @@ async function importarMercados() {
     `;
 
     let res = await fetch(
-      "https://overpass-api.de/api/interpreter",
+      "/api/overpass",
       {
         method: "POST",
         body: query
@@ -1778,10 +1778,9 @@ window.addEventListener("click", e => {
 window.onload = async () => {
   await carregarDados();
   atualizarUI();
-  trocarTela("buscaSection");
+  trocarTela("mapaSection");
   setTimeout(() => {
-    trocarTela("mapaSection");
     mostrarEstabelecimentosNoMapa();
+    iniciarLocalizacao();
   }, 500);
-  iniciarLocalizacao();
 };
