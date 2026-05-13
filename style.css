@@ -16,11 +16,11 @@ body{
   background:
     linear-gradient(
       180deg,
-      #0f172a,
-      #020617
+      #050505,
+      #0f0f10
     );
 
-  color:#e2e8f0;
+  color:#f1f5f9;
 
   padding:12px;
 
@@ -35,14 +35,14 @@ body{
   align-items:center;
   justify-content:space-between;
 
-  gap:18px;
+  gap:12px;
 
-  padding:14px 18px;
+  padding:12px 16px;
 
   margin-bottom:15px;
 
   background:
-    rgba(15,23,42,.92);
+    rgba(20,20,22,.95);
 
   backdrop-filter:blur(14px);
 
@@ -52,11 +52,13 @@ body{
     1px solid rgba(255,255,255,.05);
 
   box-shadow:
-    0 8px 25px rgba(0,0,0,.25);
+    0 8px 25px rgba(0,0,0,.35);
 
   position:relative;
 
   z-index:99999;
+
+  overflow:visible;
 }
 
 /* 🔰 LOGO */
@@ -78,17 +80,46 @@ body{
   display:flex;
   align-items:center;
 
-  gap:12px;
+  gap:10px;
 
   flex-wrap:nowrap;
+
+  flex:1;
+
+  justify-content:center;
+}
+
+/* 🔥 BOTÕES TOPBAR */
+.nav button{
+
+  width:auto;
+
+  padding:
+    18px 26px;
+
+  font-size:20px;
+
+  border-radius:999px;
+
+  flex:none;
+
+  font-weight:700;
+
+  min-width:140px;
+
+  box-shadow:
+    0 8px 22px rgba(0,0,0,.32);
 }
 
 /* 👤 AREA USER */
 #areaUsuario{
+
   margin-left:auto;
 
   display:flex;
   align-items:center;
+
+  flex-shrink:0;
 }
 
 /* 👤 USER BTN */
@@ -96,9 +127,15 @@ body{
 
   display:flex;
   align-items:center;
+  justify-content:center;
+
   gap:8px;
 
-  padding:10px 14px;
+  padding:10px 16px;
+
+  min-width:190px;
+
+  height:74px;
 
   border-radius:999px;
 
@@ -128,6 +165,7 @@ body{
 /* 📂 MENU */
 #menuUsuario{
   position:relative;
+  z-index:999999;
 }
 
 /* 📂 DROPDOWN */
@@ -137,27 +175,47 @@ body{
 
   position:absolute;
 
-  top:62px;
+  top:82px;
   right:0;
 
-  width:240px;
+  width:220px;
 
   background:
-    rgba(30,41,59,.98);
+    rgba(22,22,24,.98);
 
   backdrop-filter:blur(14px);
 
-  border-radius:16px;
+  border-radius:18px;
 
   padding:12px;
 
-  z-index:999999;
+  z-index:9999999;
 
   box-shadow:
     0 10px 30px rgba(0,0,0,.45);
 
   border:
     1px solid rgba(255,255,255,.06);
+}
+
+/* 🔻 BOTÕES DROPDOWN */
+.dropdown button{
+
+  width:100%;
+
+  padding:14px 14px;
+
+  font-size:15px;
+
+  margin-bottom:10px;
+
+  border-radius:20px;
+
+  line-height:1.3;
+}
+
+.dropdown button:last-child{
+  margin-bottom:0;
 }
 
 /* 📢 ADS */
@@ -182,8 +240,8 @@ body{
   background:
     linear-gradient(
       135deg,
-      #1e293b,
-      #0f172a
+      #1f1f22,
+      #111113
     );
 
   border:
@@ -223,7 +281,7 @@ body{
 .box{
 
   background:
-    rgba(30,41,59,.72);
+    rgba(28,28,30,.88);
 
   backdrop-filter:blur(14px);
 
@@ -244,7 +302,7 @@ body{
 .card{
 
   background:
-    rgba(51,65,85,.55);
+    rgba(40,40,43,.85);
 
   backdrop-filter:blur(12px);
 
@@ -268,7 +326,7 @@ body{
 /* 🏷️ TITULOS */
 h2{
   margin-bottom:10px;
-  color:#94a3b8;
+  color:#cbd5e1;
 }
 
 h3,
@@ -291,7 +349,7 @@ select{
   margin-top:8px;
 
   background:
-    rgba(2,6,23,.9);
+    rgba(10,10,10,.95);
 
   color:#fff;
 
@@ -303,10 +361,10 @@ select{
 input:focus,
 select:focus{
   outline:
-    2px solid #22c55e;
+    2px solid #dc2626;
 }
 
-/* 🟢 BOTÕES */
+/* 🟥 BOTÕES */
 button{
 
   border:none;
@@ -315,21 +373,21 @@ button{
 
   cursor:pointer;
 
-  font-weight:600;
+  font-weight:700;
 
   color:white;
 
   background:
     linear-gradient(
       135deg,
-      #22c55e,
-      #16a34a
+      #dc2626,
+      #991b1b
     );
 
   transition:.2s;
 
   box-shadow:
-    0 4px 12px rgba(0,0,0,.25);
+    0 4px 12px rgba(0,0,0,.35);
 }
 
 button:hover{
@@ -337,30 +395,34 @@ button:hover{
     translateY(-2px);
 }
 
-/* 🔥 BOTÕES */
-.nav button,
-.botoes-mapa button{
-  width:auto;
-  padding:
-    20px 34px;
-  font-size:22px;
-  border-radius:999px;
-  flex:none;
-  font-weight:700;
-  box-shadow:
-    0 8px 22px rgba(0,0,0,.28);
-}
-
 /* 🗺️ BOTÕES MAPA */
 .botoes-mapa{
 
   display:flex;
 
-  gap:10px;
+  gap:16px;
 
   flex-wrap:wrap;
 
-  margin-bottom:12px;
+  margin-bottom:14px;
+}
+
+/* 🔥 BOTÕES MAPA */
+.botoes-mapa button{
+
+  width:auto;
+
+  padding:
+    16px 24px;
+
+  font-size:20px;
+
+  border-radius:999px;
+
+  font-weight:700;
+
+  box-shadow:
+    0 8px 22px rgba(0,0,0,.32);
 }
 
 /* 🟢 BOTÃO ATIVO */
@@ -368,8 +430,8 @@ button:hover{
   background:
     linear-gradient(
       135deg,
-      #16a34a,
-      #15803d
+      #b91c1c,
+      #7f1d1d
     );
 }
 
@@ -380,7 +442,7 @@ button:hover{
 
 /* 💰 PREÇO */
 .preco{
-  color:#22c55e;
+  color:#ef4444;
   font-size:18px;
   font-weight:bold;
 }
@@ -396,7 +458,7 @@ button:hover{
   border-radius:18px;
   margin-top:12px;
   z-index:1;
-  background:#0f172a;
+  background:#111;
 }
 
 /* 🔥 LEAFLET */
@@ -404,7 +466,7 @@ button:hover{
   width:100% !important;
   height:100% !important;
   border-radius:18px;
-  background:#0f172a;
+  background:#111;
 }
 
 .leaflet-pane,
@@ -451,7 +513,7 @@ button:hover{
 }
 
 ::-webkit-scrollbar-thumb{
-  background:#22c55e;
+  background:#dc2626;
   border-radius:999px;
 }
 
@@ -466,7 +528,7 @@ button:hover{
 
   font-size:13px;
 
-  color:#94a3b8;
+  color:#a1a1aa;
 }
 
 /* 📱 MOBILE */
@@ -477,31 +539,93 @@ button:hover{
   }
 
   .topbar{
+
     flex-wrap:wrap;
-    gap:12px;
+
+    gap:10px;
+
     padding:10px 12px;
+
+    align-items:center;
+  }
+
+  .logoArea{
+    width:100%;
   }
 
   .logoArea h1{
     font-size:24px;
   }
 
+  /* 🔥 NAV MOBILE */
   .nav{
 
     display:flex;
 
-    gap:10px;
+    gap:8px;
 
     flex:1;
+
+    width:auto;
   }
 
-.nav button{
-  flex:1;
-  width:100%;
-  padding:16px 20px;
-  font-size:18px;
-}
+  .nav button{
 
+    flex:1;
+
+    min-width:unset;
+
+    padding:14px 14px;
+
+    font-size:17px;
+  }
+
+  /* 👤 USER */
+  #areaUsuario{
+
+    width:auto;
+
+    margin-left:auto;
+  }
+
+  .userBtn{
+
+    min-width:auto;
+
+    width:auto !important;
+
+    height:auto;
+
+    padding:10px 12px;
+
+    font-size:13px;
+  }
+
+  .avatar{
+    width:28px;
+    height:28px;
+  }
+
+  /* 🔥 MENU MOBILE */
+  .dropdown{
+
+    width:200px;
+
+    top:68px;
+
+    right:0;
+  }
+
+  .dropdown button{
+
+    padding:12px 12px;
+
+    font-size:14px;
+
+    border-radius:18px;
+  }
+
+  /* 🔥 BOTÕES MAPA */
   .botoes-mapa{
 
     display:grid;
@@ -512,32 +636,13 @@ button:hover{
     gap:10px;
   }
 
-.botoes-mapa button{
+  .botoes-mapa button{
 
-  width:100%;
+    width:100%;
 
-  padding:15px 18px;
+    padding:16px 14px;
 
-  font-size:17px;
-}
-
-  #areaUsuario{
-    margin-left:0;
-  }
-
-  .userBtn{
-    padding:9px 12px;
-    font-size:13px;
-  }
-
-  .avatar{
-    width:28px;
-    height:28px;
-  }
-
-  .dropdown{
-    width:210px;
-    right:0;
+    font-size:17px;
   }
 
   .box,
@@ -555,13 +660,15 @@ button:hover{
     font-size:16px;
   }
 
-/* 📢 BANNER MOBILE */
-.adsBanner{
-  height:90px;
-  border-radius:16px;
-  margin-bottom:14px;
-}
-.adsTexto{
-  font-size:20px;
-  padding:0 10px;
+  /* 📢 BANNER MOBILE */
+  .adsBanner{
+    height:90px;
+    border-radius:16px;
+    margin-bottom:14px;
+  }
+
+  .adsTexto{
+    font-size:20px;
+    padding:0 10px;
+  }
 }

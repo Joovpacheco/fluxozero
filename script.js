@@ -373,6 +373,7 @@ if(!usuarioLat || !usuarioLng){
 }
 // 🗺️ MOSTRAR NO MAPA
 function mostrarNoMapa(lista) {
+  if(!mapa) return;
   marcadores.forEach(m => {
     mapa.removeLayer(m);
   });
@@ -405,24 +406,43 @@ async function buscarPostos() {
     alert("Ative sua localização primeiro");
     return;
   }
+
+  if(!mapa){
+    alert("Mapa não carregado");
+    return;
+  }
+
   try {
+
     let centro = mapa.getCenter();
+
     let query = `
       [out:json];
       node["amenity"="fuel"]
       (around:5000,${centro.lat},${centro.lng});
       out;
     `;
-    let url =
-      "https://api.allorigins.win/raw?url=" +
-      encodeURIComponent(
-        "https://overpass-api.de/api/interpreter?data=" + query
-      );
-    let res = await fetch(url);
+
+    let res = await fetch(
+      "https://overpass-api.de/api/interpreter",
+      {
+        method: "POST",
+        body: query
+      }
+    );
+
+    if(!res.ok){
+      throw new Error("Erro Overpass");
+    }
+
     let data = await res.json();
+
     postos = [];
+
     data.elements.forEach(el => {
-      if (!el.lat) return;
+
+      if(!el.lat || !el.lon) return;
+
       let marker = L.marker([
         el.lat,
         el.lon
@@ -431,18 +451,31 @@ async function buscarPostos() {
       .bindPopup(`
         ⛽ <b>${el.tags?.name || "Posto"}</b>
       `);
+
       marcadores.push(marker);
+
       postos.push({
-        nome: el.tags?.name || "Posto",
+        nome:
+          el.tags?.name || "Posto",
         lat: el.lat,
         lng: el.lon,
         preco: precoGasolina
       });
+
     });
-    alert(`⛽ ${postos.length} postos encontrados`);
-  } catch (e) {
+
+    alert(
+      `⛽ ${postos.length} postos encontrados`
+    );
+
+  } catch(e){
+
     console.log(e);
-    alert("Erro ao buscar postos");
+
+    alert(
+      "Erro ao buscar postos"
+    );
+
   }
 }
 // 🧠 MELHOR COMBO
@@ -505,127 +538,229 @@ function calcularMelhorCombo(produto) {
 // 🚀 MELHOR ROTA
 function buscarMelhorCombo() {
 
-  if (!usuarioLat) {
-    return alert(
-      "Ative sua localização primeiro!"
-    );
+  if (!usuarioLat || !usuarioLng) {
+    alert("Ative sua localização primeiro!");
+    return;
   }
+
   let termo =
     document
       .getElementById("busca")
       .value
-      .toLowerCase();
-  // 🔥 SEM POSTOS
-  if (postos.length === 0) {
-    let melhor = null;
-    estabelecimentos.forEach(est => {
-      (est.produtos || []).forEach(prod => {
-        if (
-          !prod.nome
+      .toLowerCase()
+      .trim();
+
+  let melhor = null;
+
+  estabelecimentos.forEach(est => {
+
+    let distancia =
+      calcularDistancia(
+        usuarioLat,
+        usuarioLng,
+        est.lat,
+        est.lng
+      );
+
+    let nomeCombina =
+      est.nome
+        .toLowerCase()
+        .includes(termo);
+
+    let produtoEncontrado = null;
+
+    if (
+      est.produtos &&
+      est.produtos.length > 0
+    ) {
+
+      produtoEncontrado =
+        est.produtos.find(prod =>
+          prod.nome
             .toLowerCase()
             .includes(termo)
-        ) return;
-        let dist =
+        );
+    }
+
+    if (!termo) {
+      nomeCombina = true;
+    }
+
+    if (
+      !nomeCombina &&
+      !produtoEncontrado
+    ) {
+      return;
+    }
+
+    let preco = 0;
+
+    if (
+      produtoEncontrado &&
+      !isNaN(produtoEncontrado.preco)
+    ) {
+      preco =
+        produtoEncontrado.preco;
+    }
+
+    // 🔥 COM POSTOS
+    if (postos.length > 0) {
+
+      postos.forEach(posto => {
+
+        let d1 =
           calcularDistancia(
             usuarioLat,
             usuarioLng,
+            posto.lat,
+            posto.lng
+          );
+
+        let d2 =
+          calcularDistancia(
+            posto.lat,
+            posto.lng,
             est.lat,
             est.lng
           );
-        let custo =
-          prod.preco;
+
+        let custoGasolina =
+          ((d1 + d2) / 10) *
+          posto.preco;
+
+        let custoTotal =
+          preco + custoGasolina;
+
         if (
           !melhor ||
-          custo < melhor.custoTotal
+          custoTotal < melhor.custoTotal
         ) {
+
           melhor = {
-            produto: prod.nome,
+
+            produto:
+              produtoEncontrado?.nome ||
+              "Estabelecimento",
+
             mercado: est.nome,
-            custoTotal: custo,
+
+            posto: posto.nome,
+
+            custoTotal,
+
             lat: est.lat,
-            lng: est.lng
+            lng: est.lng,
+
+            postoLat: posto.lat,
+            postoLng: posto.lng
           };
         }
       });
-    });
-    if (!melhor) {
-      return alert("Nada encontrado");
+
     }
-    marcadores.forEach(m => {
-      mapa.removeLayer(m);
-    });
-    marcadores = [];
-    if (linhaRota) {
-      mapa.removeLayer(linhaRota);
+
+    // 🔥 SEM POSTOS
+    else {
+
+      let custoTotal =
+        preco + distancia * 0.1;
+
+      if (
+        !melhor ||
+        custoTotal < melhor.custoTotal
+      ) {
+
+        melhor = {
+
+          produto:
+            produtoEncontrado?.nome ||
+            "Estabelecimento",
+
+          mercado: est.nome,
+
+          custoTotal,
+
+          lat: est.lat,
+          lng: est.lng
+        };
+      }
     }
-    let mUser = L.marker([
-      usuarioLat,
-      usuarioLng
-    ])
-      .addTo(mapa)
-      .bindPopup("📍 Você");
-    let mMercado = L.marker(
-      [melhor.lat, melhor.lng],
-      { icon: iconeMelhor }
-    )
-      .addTo(mapa)
-      .bindPopup("🏪 Melhor mercado");
-    marcadores.push(
-      mUser,
-      mMercado
-    );
-    let pontos = [
-      [usuarioLat, usuarioLng],
-      [melhor.lat, melhor.lng]
-    ];
-    desenharRotaDireta(
-      pontos,
-      melhor
-    );
+  });
+
+  if (!melhor) {
+    alert("Nada encontrado");
     return;
   }
-  // 🔥 COM POSTOS
-  let r =
-    calcularMelhorCombo(termo);
-  if (!r) {
-    return alert("Nada encontrado");
-  }
+
   marcadores.forEach(m => {
     mapa.removeLayer(m);
   });
+
   marcadores = [];
+
   if (linhaRota) {
     mapa.removeLayer(linhaRota);
   }
+
   let mUser = L.marker([
     usuarioLat,
     usuarioLng
   ])
     .addTo(mapa)
     .bindPopup("📍 Você");
-  let mPosto = L.marker([
-    r.postoLat,
-    r.postoLng
-  ])
-    .addTo(mapa)
-    .bindPopup("⛽ Posto");
+
+  marcadores.push(mUser);
+
+  let pontos = [
+    [usuarioLat, usuarioLng]
+  ];
+
+  // 🔥 COM POSTO
+  if (melhor.postoLat) {
+
+    let mPosto = L.marker([
+      melhor.postoLat,
+      melhor.postoLng
+    ])
+      .addTo(mapa)
+      .bindPopup("⛽ Posto");
+
+    marcadores.push(mPosto);
+
+    pontos.push([
+      melhor.postoLat,
+      melhor.postoLng
+    ]);
+  }
+
+  // 🏪 DESTINO
   let mMercado = L.marker(
-    [r.lat, r.lng],
-    { icon: iconeMelhor }
+    [melhor.lat, melhor.lng],
+    {
+      icon: iconeMelhor
+    }
   )
     .addTo(mapa)
-    .bindPopup("🏪 Melhor mercado");
-  marcadores.push(
-    mUser,
-    mPosto,
-    mMercado
-  );
-  let pontos = [
-    [usuarioLat, usuarioLng],
-    [r.postoLat, r.postoLng],
-    [r.lat, r.lng]
-  ];
-  desenharRota(pontos, r);
+    .bindPopup(`
+      🏪 ${melhor.mercado}
+    `);
+
+  marcadores.push(mMercado);
+
+  pontos.push([
+    melhor.lat,
+    melhor.lng
+  ]);
+
+  // 🔥 DESENHA ROTA
+  if (melhor.postoLat) {
+    desenharRota(pontos, melhor);
+  } else {
+    desenharRotaDireta(
+      pontos,
+      melhor
+    );
+  }
 }
 // 🛣️ ROTA
 async function desenharRota(pontos, r) {
@@ -1370,39 +1505,76 @@ async function importarMercados() {
     alert("Ative sua localização primeiro");
     return;
   }
-  if (!mapa) {
+
+  if(!mapa){
     alert("Abra o mapa primeiro");
     return;
   }
+
   try {
+
     let centro = mapa.getCenter();
+
     let query = `
       [out:json];
       (
         node["shop"="supermarket"]
         (around:5000,${centro.lat},${centro.lng});
+
         node["shop"="convenience"]
         (around:5000,${centro.lat},${centro.lng});
 
         node["shop"="bakery"]
         (around:5000,${centro.lat},${centro.lng});
+
+        node["amenity"="restaurant"]
+        (around:5000,${centro.lat},${centro.lng});
+
+        node["amenity"="fast_food"]
+        (around:5000,${centro.lat},${centro.lng});
+
+        node["amenity"="cafe"]
+        (around:5000,${centro.lat},${centro.lng});
+
+        node["shop"="butcher"]
+        (around:5000,${centro.lat},${centro.lng});
+
+        node["shop"="greengrocer"]
+        (around:5000,${centro.lat},${centro.lng});
+
+        node["amenity"="fuel"]
+        (around:5000,${centro.lat},${centro.lng});
       );
       out;
     `;
-    let url =
-      "https://api.allorigins.win/raw?url=" +
-      encodeURIComponent(
-        "https://overpass-api.de/api/interpreter?data=" + query
-      );
-    let res = await fetch(url);
+
+    let res = await fetch(
+      "https://overpass-api.de/api/interpreter",
+      {
+        method: "POST",
+        body: query
+      }
+    );
+
+    if(!res.ok){
+      throw new Error("Erro Overpass");
+    }
+
     let data = await res.json();
-    let adicionados = 0;
-    for (let el of data.elements) {
+
+    let novosEstabelecimentos = [];
+
+    for(let el of data.elements){
+
+      if(!el.lat || !el.lon) continue;
+
       let nome =
         el.tags?.name ||
         "Estabelecimento";
+
       let lat = el.lat;
       let lng = el.lon;
+
       let existe =
         estabelecimentos.find(
           e =>
@@ -1410,12 +1582,40 @@ async function importarMercados() {
             Math.abs(e.lat - lat) < 0.0001 &&
             Math.abs(e.lng - lng) < 0.0001
         );
-      if (existe) continue;
-      let tipo = "Mercado";
-      if (el.tags?.shop === "bakery") {
+
+      if(existe) continue;
+
+      let tipo = "Estabelecimento";
+
+      if(el.tags?.shop === "supermarket"){
+        tipo = "Mercado";
+      }
+      else if(el.tags?.shop === "convenience"){
+        tipo = "Conveniência";
+      }
+      else if(el.tags?.shop === "bakery"){
         tipo = "Padaria";
       }
-      let novo = {
+      else if(el.tags?.amenity === "restaurant"){
+        tipo = "Restaurante";
+      }
+      else if(el.tags?.amenity === "fast_food"){
+        tipo = "Lanchonete";
+      }
+      else if(el.tags?.amenity === "cafe"){
+        tipo = "Cafeteria";
+      }
+      else if(el.tags?.shop === "butcher"){
+        tipo = "Açougue";
+      }
+      else if(el.tags?.shop === "greengrocer"){
+        tipo = "Hortifruti";
+      }
+      else if(el.tags?.amenity === "fuel"){
+        tipo = "Posto";
+      }
+
+      novosEstabelecimentos.push({
         dono: "IMPORTADO",
         nome,
         tipo,
@@ -1424,25 +1624,45 @@ async function importarMercados() {
         lng,
         produtos: [],
         avaliacoes: []
-      };
+      });
+
+    }
+
+    if(novosEstabelecimentos.length > 0){
+
       let { error } =
         await db
           .from("estabelecimentos")
-          .insert([novo]);
-      if (!error) {
-        adicionados++;
+          .insert(novosEstabelecimentos);
+
+      if(error){
+
+        console.log(error);
+
+        alert(
+          "Erro ao salvar estabelecimentos"
+        );
+
+        return;
       }
     }
+
     await carregarDados();
+
     mostrarEstabelecimentosNoMapa();
+
     alert(
-      `✅ ${adicionados} estabelecimentos importados`
+      `✅ ${novosEstabelecimentos.length} estabelecimentos importados`
     );
-  } catch (e) {
+
+  } catch(e){
+
     console.log(e);
+
     alert(
       "Erro ao importar estabelecimentos"
     );
+
   }
 }
 function mostrarEstabelecimentosNoMapa() {
